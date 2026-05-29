@@ -1,4 +1,5 @@
 pub mod app_state;
+pub mod approval;
 pub mod commands;
 pub mod database;
 pub mod dataset;
