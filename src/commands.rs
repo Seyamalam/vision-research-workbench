@@ -1,5 +1,6 @@
 use crate::workspace::ResearchTemplate;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CommandSpec {
@@ -43,6 +44,7 @@ pub enum PermissionGate {
 #[serde(tag = "type", rename_all = "kebab-case")]
 pub enum CommandPlan {
     CreateProject {
+        root: PathBuf,
         name: String,
         template: ResearchTemplate,
     },

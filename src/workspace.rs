@@ -66,6 +66,10 @@ impl ProjectManifest {
         let encoded = fs::read_to_string(path)?;
         Ok(toml::from_str(&encoded)?)
     }
+
+    pub fn artifact_paths(&self, root: impl AsRef<Path>) -> Vec<PathBuf> {
+        self.artifacts.paths(root.as_ref())
+    }
 }
 
 impl Default for ArtifactLayout {
@@ -82,16 +86,23 @@ impl Default for ArtifactLayout {
 }
 
 impl ArtifactLayout {
-    pub fn create_dirs(&self, root: &Path) -> io::Result<()> {
-        for directory in [
+    pub fn paths(&self, root: &Path) -> Vec<PathBuf> {
+        [
             &self.metadata_dir,
             &self.reports_dir,
             &self.predictions_dir,
             &self.figures_dir,
             &self.manuscripts_dir,
             &self.agents_dir,
-        ] {
-            fs::create_dir_all(root.join(directory))?;
+        ]
+        .into_iter()
+        .map(|directory| root.join(directory))
+        .collect()
+    }
+
+    pub fn create_dirs(&self, root: &Path) -> io::Result<()> {
+        for directory in self.paths(root) {
+            fs::create_dir_all(directory)?;
         }
 
         Ok(())
@@ -166,6 +177,7 @@ mod tests {
             loaded.project.template.label(),
             "Leaf disease classification"
         );
+        assert_eq!(loaded.artifact_paths(temp.path()).len(), 6);
         assert!(temp.path().join("metadata").is_dir());
         assert!(temp.path().join("reports/predictions").is_dir());
         assert!(temp.path().join("reports/figures").is_dir());
