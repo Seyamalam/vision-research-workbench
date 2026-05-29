@@ -18,6 +18,7 @@ pub struct ProjectManifest {
 pub struct ProjectInfo {
     pub name: String,
     pub template: ResearchTemplate,
+    pub label_mapping: Vec<LabelMapping>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -38,6 +39,12 @@ pub struct ArtifactLayout {
     pub agents_dir: PathBuf,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LabelMapping {
+    pub source: String,
+    pub target: String,
+}
+
 impl ProjectManifest {
     pub fn new(name: impl Into<String>, template: ResearchTemplate) -> Self {
         Self {
@@ -45,6 +52,7 @@ impl ProjectManifest {
             project: ProjectInfo {
                 name: name.into(),
                 template,
+                label_mapping: template.default_label_mapping(),
             },
             artifacts: ArtifactLayout::default(),
         }
@@ -117,6 +125,32 @@ impl ResearchTemplate {
             Self::LeafDiseaseClassification => "Leaf disease classification",
         }
     }
+
+    pub fn default_label_mapping(self) -> Vec<LabelMapping> {
+        match self {
+            Self::GenericImageClassification => Vec::new(),
+            Self::BinaryMedicalImaging => vec![
+                LabelMapping {
+                    source: "infected".to_string(),
+                    target: "positive".to_string(),
+                },
+                LabelMapping {
+                    source: "noninfected".to_string(),
+                    target: "negative".to_string(),
+                },
+            ],
+            Self::LeafDiseaseClassification => vec![
+                LabelMapping {
+                    source: "healthy".to_string(),
+                    target: "healthy".to_string(),
+                },
+                LabelMapping {
+                    source: "disease".to_string(),
+                    target: "disease".to_string(),
+                },
+            ],
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -177,6 +211,7 @@ mod tests {
             loaded.project.template.label(),
             "Leaf disease classification"
         );
+        assert_eq!(loaded.project.label_mapping.len(), 2);
         assert_eq!(loaded.artifact_paths(temp.path()).len(), 6);
         assert!(temp.path().join("metadata").is_dir());
         assert!(temp.path().join("reports/predictions").is_dir());
