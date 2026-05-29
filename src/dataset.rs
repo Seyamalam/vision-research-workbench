@@ -2,6 +2,7 @@ use crate::workspace::{ProjectManifest, WorkspaceError};
 use image::{GenericImageView, ImageReader};
 use serde::{Deserialize, Serialize};
 use std::{
+    collections::BTreeMap,
     error::Error,
     ffi::OsStr,
     fmt, fs, io,
@@ -30,6 +31,14 @@ pub struct DatasetImportSummary {
     pub readable_images: usize,
     pub unreadable_images: usize,
     pub output_csv: PathBuf,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DatasetSummary {
+    pub total_files: usize,
+    pub readable_images: usize,
+    pub unreadable_images: usize,
+    pub class_counts: BTreeMap<String, usize>,
 }
 
 pub fn import_image_folder(
@@ -90,6 +99,24 @@ pub fn write_image_records_csv(
     writer.flush()?;
 
     Ok(())
+}
+
+pub fn summarize_records(records: &[ImageRecord]) -> DatasetSummary {
+    let mut class_counts = BTreeMap::new();
+    for record in records.iter().filter(|record| record.readable) {
+        let class_name = record
+            .class_name
+            .clone()
+            .unwrap_or_else(|| "unlabeled".to_string());
+        *class_counts.entry(class_name).or_insert(0) += 1;
+    }
+
+    DatasetSummary {
+        total_files: records.len(),
+        readable_images: records.iter().filter(|record| record.readable).count(),
+        unreadable_images: records.iter().filter(|record| !record.readable).count(),
+        class_counts,
+    }
 }
 
 fn read_image_record(dataset_root: &Path, path: &Path) -> Result<ImageRecord, DatasetError> {
@@ -218,5 +245,52 @@ mod tests {
         assert_eq!(summary.readable_images, 1);
         assert_eq!(summary.unreadable_images, 1);
         assert!(summary.output_csv.is_file());
+    }
+
+    #[test]
+    fn summarizes_readable_images_by_class() {
+        let records = vec![
+            ImageRecord {
+                path: "healthy/a.png".into(),
+                class_name: Some("healthy".to_string()),
+                label: Some("healthy".to_string()),
+                readable: true,
+                width: Some(10),
+                height: Some(10),
+                color_type: Some("Rgb8".to_string()),
+                suffix: Some("png".to_string()),
+                file_size: 10,
+            },
+            ImageRecord {
+                path: "healthy/b.png".into(),
+                class_name: Some("healthy".to_string()),
+                label: Some("healthy".to_string()),
+                readable: true,
+                width: Some(10),
+                height: Some(10),
+                color_type: Some("Rgb8".to_string()),
+                suffix: Some("png".to_string()),
+                file_size: 10,
+            },
+            ImageRecord {
+                path: "disease/broken.jpg".into(),
+                class_name: Some("disease".to_string()),
+                label: Some("disease".to_string()),
+                readable: false,
+                width: None,
+                height: None,
+                color_type: None,
+                suffix: Some("jpg".to_string()),
+                file_size: 10,
+            },
+        ];
+
+        let summary = summarize_records(&records);
+
+        assert_eq!(summary.total_files, 3);
+        assert_eq!(summary.readable_images, 2);
+        assert_eq!(summary.unreadable_images, 1);
+        assert_eq!(summary.class_counts.get("healthy"), Some(&2));
+        assert_eq!(summary.class_counts.get("disease"), None);
     }
 }
