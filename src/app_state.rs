@@ -1,5 +1,6 @@
 use crate::{
     commands::{CommandPlan, CommandRisk, CommandSpec, PermissionGate, registry},
+    database::{CommandAuditEvent, DatabaseError, ProjectDatabase},
     dataset::{DatasetError, import_image_folder},
     duplicates::{DuplicateError, audit_exact_duplicates},
     settings::{AppSettings, SettingsError},
@@ -171,6 +172,29 @@ impl AppState {
         }
     }
 
+    pub fn execute_with_audit(
+        &mut self,
+        actor: impl Into<String>,
+        plan: CommandPlan,
+        mode: ExecutionMode,
+    ) -> Result<CommandOutcome, AppStateError> {
+        let outcome = self.execute(plan.clone(), mode)?;
+
+        if outcome.applied
+            && let Some(project_root) = self.project_root.as_ref()
+        {
+            let database = ProjectDatabase::open(project_root)?;
+            database.insert_command_event(&CommandAuditEvent::new(
+                actor,
+                mode,
+                plan,
+                outcome.clone(),
+            ))?;
+        }
+
+        Ok(outcome)
+    }
+
     pub fn approval_required_count(&self) -> usize {
         self.commands
             .iter()
@@ -206,6 +230,7 @@ pub enum AppStateError {
     Workspace(WorkspaceError),
     Settings(SettingsError),
     Dataset(DatasetError),
+    Database(DatabaseError),
     Duplicate(DuplicateError),
 }
 
@@ -227,6 +252,12 @@ impl From<DatasetError> for AppStateError {
     }
 }
 
+impl From<DatabaseError> for AppStateError {
+    fn from(error: DatabaseError) -> Self {
+        Self::Database(error)
+    }
+}
+
 impl From<DuplicateError> for AppStateError {
     fn from(error: DuplicateError) -> Self {
         Self::Duplicate(error)
@@ -240,6 +271,7 @@ impl fmt::Display for AppStateError {
             Self::Workspace(error) => write!(formatter, "{error}"),
             Self::Settings(error) => write!(formatter, "{error}"),
             Self::Dataset(error) => write!(formatter, "{error}"),
+            Self::Database(error) => write!(formatter, "{error}"),
             Self::Duplicate(error) => write!(formatter, "{error}"),
         }
     }
@@ -355,5 +387,27 @@ mod tests {
             .expect_err("missing active project should fail");
 
         assert!(matches!(error, AppStateError::NoActiveProject));
+    }
+
+    #[test]
+    fn execute_with_audit_records_applied_commands() {
+        let temp = tempfile::tempdir().expect("tempdir");
+        let root = temp.path().join("audited-project");
+        let mut state = AppState::new();
+
+        state
+            .execute_with_audit(
+                "test",
+                CommandPlan::CreateProject {
+                    root: root.clone(),
+                    name: "Audited".to_string(),
+                    template: ResearchTemplate::GenericImageClassification,
+                },
+                ExecutionMode::Apply,
+            )
+            .expect("create project");
+
+        let database = ProjectDatabase::open(&root).expect("database");
+        assert_eq!(database.command_event_count().expect("event count"), 1);
     }
 }
