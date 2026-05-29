@@ -72,6 +72,12 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 - [ ] Count pHash near-duplicate files beyond first representative.
 - [ ] Detect cross-label pHash near-duplicate groups.
 - [ ] Count cross-label pHash groups.
+- [x] Compute perceptual hashes with pHash-style average hash.
+- [x] Group perceptual near-duplicates by configurable Hamming radius.
+- [x] Count perceptual near-duplicate groups.
+- [x] Count perceptual near-duplicate files beyond first representative.
+- [x] Detect cross-label perceptual near-duplicate groups.
+- [x] Count cross-label perceptual groups.
 - [ ] Generate duplicate examples.
 - [ ] Generate cross-label duplicate examples.
 - [ ] Build visual duplicate/conflict panel.
@@ -81,6 +87,7 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 
 ## 4. Leakage-Controlled Splitting
 
+- [x] Create deterministic train/validation/test split export.
 - [ ] Create duplicate-aware train/validation/test splits.
 - [ ] Create stricter pHash near-duplicate-aware splits.
 - [ ] Prevent near-duplicate groups from crossing train/validation/test.
@@ -313,6 +320,7 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 - [x] Define mutating command API with permission gates.
 - [x] Add job-plan schema for agent-proposed work.
 - [x] Add audit log for agent actions.
+- [x] Add audited command execution path.
 - [ ] Add artifact provenance for agent-created files.
 - [ ] Add ACP-compatible transport spike.
 - [ ] Add local agent connection manager.

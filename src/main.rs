@@ -94,8 +94,8 @@ impl WorkbenchApp {
                 },
                 Metric {
                     label: "Agent Mode",
-                    value: "Dry-run ready",
-                    detail: "Commands can preview planned writes before applying",
+                    value: "Audit Logged",
+                    detail: "Applied commands can be recorded to SQLite",
                 },
             ],
             tasks: vec![
@@ -109,11 +109,15 @@ impl WorkbenchApp {
                 },
                 Task {
                     title: "Build audit pipeline",
-                    detail: "Exact MD5 duplicate audit is available; pHash is next.",
+                    detail: "Exact and perceptual near-duplicate audit cores are available.",
+                },
+                Task {
+                    title: "Generate leakage-aware splits",
+                    detail: "Deterministic train/validation/test split export is available.",
                 },
                 Task {
                     title: "Add agent command layer",
-                    detail: "Approval request model is ready; ACP transport and UI approvals are next.",
+                    detail: "Audit logging and approval requests are ready; ACP transport is next.",
                 },
             ],
             state,
