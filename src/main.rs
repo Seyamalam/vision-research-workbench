@@ -2,11 +2,17 @@ use gpui::{
     App, AppContext, Application, Bounds, Context, FontWeight, IntoElement, ParentElement, Render,
     SharedString, Styled, Window, WindowBounds, WindowOptions, div, px, rgb, size,
 };
+use vision_research_workbench::{
+    commands::{CommandSpec, PermissionGate, registry},
+    workspace::{ProjectManifest, ResearchTemplate},
+};
 
 struct WorkbenchApp {
     sections: Vec<Section>,
     metrics: Vec<Metric>,
     tasks: Vec<Task>,
+    sample_project: ProjectManifest,
+    commands: Vec<CommandSpec>,
 }
 
 struct Section {
@@ -97,6 +103,11 @@ impl WorkbenchApp {
                     detail: "Make UI actions and future ACP agents share typed commands.",
                 },
             ],
+            sample_project: ProjectManifest::new(
+                "Untitled vision study",
+                ResearchTemplate::GenericImageClassification,
+            ),
+            commands: registry(),
         }
     }
 }
@@ -189,7 +200,9 @@ impl WorkbenchApp {
             .gap_6()
             .child(self.header())
             .child(self.metric_row())
+            .child(self.project_panel())
             .child(self.task_panel())
+            .child(self.agent_panel())
     }
 
     fn header(&self) -> impl IntoElement {
@@ -249,6 +262,41 @@ impl WorkbenchApp {
         row
     }
 
+    fn project_panel(&self) -> impl IntoElement {
+        div()
+            .flex()
+            .flex_col()
+            .rounded_md()
+            .border_1()
+            .border_color(rgb(0xd7dde5))
+            .bg(rgb(0xffffff))
+            .p_5()
+            .gap_3()
+            .child(
+                div()
+                    .text_lg()
+                    .font_weight(FontWeight::BOLD)
+                    .child("Project workspace"),
+            )
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(rgb(0x4b5563))
+                    .child(self.sample_project.project.name.clone()),
+            )
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(rgb(0x4b5563))
+                    .child(self.sample_project.project.template.label()),
+            )
+            .child(
+                div().text_sm().text_color(rgb(0x4b5563)).child(
+                    "Artifacts: metadata, reports, predictions, figures, manuscript, agents",
+                ),
+            )
+    }
+
     fn task_panel(&self) -> impl IntoElement {
         let mut panel = div()
             .flex()
@@ -282,6 +330,56 @@ impl WorkbenchApp {
                             .gap_1()
                             .child(div().font_weight(FontWeight::SEMIBOLD).child(task.title))
                             .child(div().text_sm().text_color(rgb(0x4b5563)).child(task.detail)),
+                    ),
+            );
+        }
+
+        panel
+    }
+
+    fn agent_panel(&self) -> impl IntoElement {
+        let gated_count = self
+            .commands
+            .iter()
+            .filter(|command| command.permission != PermissionGate::None)
+            .count();
+
+        let mut panel = div()
+            .flex()
+            .flex_col()
+            .rounded_md()
+            .border_1()
+            .border_color(rgb(0xd7dde5))
+            .bg(rgb(0xffffff))
+            .p_5()
+            .gap_4()
+            .child(
+                div()
+                    .text_lg()
+                    .font_weight(FontWeight::BOLD)
+                    .child("Agent command layer"),
+            )
+            .child(div().text_sm().text_color(rgb(0x4b5563)).child(format!(
+                "{} registered commands, {} require approval",
+                self.commands.len(),
+                gated_count
+            )));
+
+        for command in self.commands.iter().take(4) {
+            panel = panel.child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .gap_1()
+                    .border_t_1()
+                    .border_color(rgb(0xe5e7eb))
+                    .pt_3()
+                    .child(div().font_weight(FontWeight::SEMIBOLD).child(command.label))
+                    .child(
+                        div()
+                            .text_sm()
+                            .text_color(rgb(0x4b5563))
+                            .child(command.description),
                     ),
             );
         }
