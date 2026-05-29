@@ -53,7 +53,7 @@ pub enum CommandPlan {
         root: PathBuf,
     },
     ImportDataset {
-        path: String,
+        path: PathBuf,
     },
     AuditDuplicates,
     GenerateSplits {

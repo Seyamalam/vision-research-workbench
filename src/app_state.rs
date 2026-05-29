@@ -1,5 +1,6 @@
 use crate::{
     commands::{CommandPlan, CommandRisk, CommandSpec, PermissionGate, registry},
+    dataset::{DatasetError, import_image_folder},
     settings::{AppSettings, SettingsError},
     workspace::{ProjectManifest, WorkspaceError},
 };
@@ -90,10 +91,36 @@ impl AppState {
                     artifacts: vec![root.join(crate::workspace::PROJECT_FILE_NAME)],
                 })
             }
-            CommandPlan::ImportDataset { path } => Ok(not_implemented_outcome(
-                "Import dataset",
-                format!("Dataset import is planned for {path}."),
-            )),
+            CommandPlan::ImportDataset { path } => {
+                let (Some(project_root), Some(project)) =
+                    (self.project_root.as_ref(), self.active_project.as_ref())
+                else {
+                    return Err(AppStateError::NoActiveProject);
+                };
+
+                if mode == ExecutionMode::DryRun {
+                    return Ok(CommandOutcome {
+                        applied: false,
+                        summary: format!("Would import image metadata from {}", path.display()),
+                        artifacts: vec![
+                            project_root
+                                .join(&project.artifacts.metadata_dir)
+                                .join(crate::dataset::IMAGES_CSV_NAME),
+                        ],
+                    });
+                }
+
+                let summary = import_image_folder(path, project_root, project)?;
+
+                Ok(CommandOutcome {
+                    applied: true,
+                    summary: format!(
+                        "Imported {} readable images from {} candidate files",
+                        summary.readable_images, summary.total_files
+                    ),
+                    artifacts: vec![summary.output_csv],
+                })
+            }
             CommandPlan::AuditDuplicates => Ok(not_implemented_outcome(
                 "Audit duplicates",
                 "Duplicate auditing is planned.".to_string(),
@@ -148,8 +175,10 @@ fn not_implemented_outcome(label: &str, summary: String) -> CommandOutcome {
 
 #[derive(Debug)]
 pub enum AppStateError {
+    NoActiveProject,
     Workspace(WorkspaceError),
     Settings(SettingsError),
+    Dataset(DatasetError),
 }
 
 impl From<WorkspaceError> for AppStateError {
@@ -164,11 +193,19 @@ impl From<SettingsError> for AppStateError {
     }
 }
 
+impl From<DatasetError> for AppStateError {
+    fn from(error: DatasetError) -> Self {
+        Self::Dataset(error)
+    }
+}
+
 impl fmt::Display for AppStateError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::NoActiveProject => write!(formatter, "no active project"),
             Self::Workspace(error) => write!(formatter, "{error}"),
             Self::Settings(error) => write!(formatter, "{error}"),
+            Self::Dataset(error) => write!(formatter, "{error}"),
         }
     }
 }
@@ -266,5 +303,22 @@ mod tests {
                 .map(|project| project.project.template),
             Some(ResearchTemplate::BinaryMedicalImaging)
         );
+    }
+
+    #[test]
+    fn import_dataset_requires_active_project() {
+        let temp = tempfile::tempdir().expect("tempdir");
+        let mut state = AppState::new();
+
+        let error = state
+            .execute(
+                CommandPlan::ImportDataset {
+                    path: temp.path().to_path_buf(),
+                },
+                ExecutionMode::DryRun,
+            )
+            .expect_err("missing active project should fail");
+
+        assert!(matches!(error, AppStateError::NoActiveProject));
     }
 }
