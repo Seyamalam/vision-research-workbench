@@ -98,8 +98,13 @@ This repository now contains the first GPUI shell plus a reusable application co
 - Default artifact folders for metadata, reports, predictions, figures, manuscripts, and agents.
 - A typed command registry with risk levels and approval gates.
 - A dry-run/apply execution path for project creation commands.
+- Project open support and recent-project settings.
+- Folder-based image metadata import to `metadata/images.csv`.
+- SQLite command audit log foundation.
+- Exact duplicate audit export to `metadata/exact_duplicates.csv`.
+- Approval request model for gated UI and future agent commands.
 
-The next implementation step is to add project open/recent-project flows and persistent SQLite-backed state.
+The next implementation step is to add visible UI flows for create/open/import/audit and then implement pHash near-duplicate detection.
 
 ## Run Locally
 
@@ -120,13 +125,13 @@ xcodebuild -downloadComponent MetalToolchain
 ## Initial Milestones
 
 1. Scaffold Rust workspace and minimal GPUI app. Done.
-2. Implement project workspace creation/opening. Creation core started.
-3. Implement dataset import, label mapping, and metadata indexing.
-4. Add duplicate and near-duplicate audit views.
+2. Implement project workspace creation/opening. Core done; visible UI flow pending.
+3. Implement dataset import, label mapping, and metadata indexing. Folder import core started.
+4. Add duplicate and near-duplicate audit views. Exact duplicate core started.
 5. Add leakage-aware split generation.
 6. Add prediction import and evaluation dashboard.
 7. Add calibration, robustness, and XAI report modules.
-8. Add agent-ready command registry and project-state API. Command registry and dry-run started.
+8. Add agent-ready command registry and project-state API. Command registry, dry-run, audit log, and approval model started.
 9. Add manuscript and reproducibility export pipeline.
 
 ## Development Prerequisites

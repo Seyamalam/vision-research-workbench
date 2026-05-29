@@ -89,8 +89,8 @@ impl WorkbenchApp {
                 },
                 Metric {
                     label: "Dataset State",
-                    value: "Not Imported",
-                    detail: "Folder and CSV manifest import planned",
+                    value: "Import Core Ready",
+                    detail: "Folder scan exports image metadata CSV",
                 },
                 Metric {
                     label: "Agent Mode",
@@ -105,15 +105,15 @@ impl WorkbenchApp {
                 },
                 Task {
                     title: "Import image dataset",
-                    detail: "Read folders or manifests, infer labels, and index metadata.",
+                    detail: "Folder-based image metadata import is available in the command core.",
                 },
                 Task {
                     title: "Build audit pipeline",
-                    detail: "Hash files, group near-duplicates, and flag label conflicts.",
+                    detail: "Exact MD5 duplicate audit is available; pHash is next.",
                 },
                 Task {
                     title: "Add agent command layer",
-                    detail: "Add ACP transport and approval UI on top of the shared command layer.",
+                    detail: "Approval request model is ready; ACP transport and UI approvals are next.",
                 },
             ],
             state,

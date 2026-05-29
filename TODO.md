@@ -23,9 +23,9 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 - [x] Add project manifest save/load support.
 - [x] Add default artifact directory layout.
 - [x] Add project creation command core.
-- [ ] Add project open command core.
+- [x] Add project open command core.
 - [ ] Implement create/open/recent project flows.
-- [ ] Implement persistent settings.
+- [x] Implement persistent settings.
 - [ ] Implement background job queue.
 - [ ] Implement cancellable long-running jobs.
 - [ ] Implement structured logs per job.
@@ -34,35 +34,38 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 
 ## 2. Data Setup
 
-- [ ] Import image dataset root.
+- [x] Import image dataset root.
+- [x] Add folder-based image dataset scan core.
+- [x] Export image metadata to `metadata/images.csv`.
 - [ ] Import image dataset from CSV manifest.
-- [ ] Parse folder structures into labels.
+- [x] Parse folder structures into labels.
 - [ ] Support binary label mapping.
 - [ ] Support multiclass label mapping.
 - [ ] Add PCOS-XAI template mapping `infected` to PCOS-positive.
 - [ ] Add PCOS-XAI template mapping `noninfected` to healthy/non-PCOS.
 - [ ] Add leaf disease template for healthy/disease or disease-class labels.
-- [ ] Build image metadata for all files.
-- [ ] Check image readability.
-- [ ] Record image width and height.
-- [ ] Record image mode/color type.
-- [ ] Record file suffix.
-- [ ] Record file size.
-- [ ] Record class name.
-- [ ] Record binary label.
-- [ ] Export `metadata/images.csv`.
+- [x] Build image metadata for all files.
+- [x] Check image readability.
+- [x] Record image width and height.
+- [x] Record image mode/color type.
+- [x] Record file suffix.
+- [x] Record file size.
+- [x] Record class name.
+- [x] Record labels from class folders.
+- [x] Export `metadata/images.csv`.
 - [ ] Add dataset overview screen.
+- [ ] Add visible dataset import UI.
 - [ ] Add unreadable image report.
 
 ## 3. Dataset Audit
 
-- [ ] Count total readable images.
+- [x] Count total readable images.
 - [ ] Count class balance.
-- [ ] Compute exact file hashes using MD5.
-- [ ] Find exact duplicate groups.
-- [ ] Count exact duplicate groups.
-- [ ] Count duplicate files beyond first copy.
-- [ ] Export exact duplicate metadata.
+- [x] Compute exact file hashes using MD5.
+- [x] Find exact duplicate groups.
+- [x] Count exact duplicate groups.
+- [x] Count duplicate files beyond first copy.
+- [x] Export exact duplicate metadata.
 - [ ] Compute perceptual hashes with pHash.
 - [ ] Group pHash near-duplicates by configurable Hamming radius.
 - [ ] Count pHash near-duplicate groups.
@@ -73,6 +76,7 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 - [ ] Generate cross-label duplicate examples.
 - [ ] Build visual duplicate/conflict panel.
 - [ ] Add interactive duplicate browser.
+- [ ] Add visible exact duplicate audit UI.
 - [ ] Add cross-label conflict triage workflow.
 
 ## 4. Leakage-Controlled Splitting
@@ -308,11 +312,12 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 - [ ] Define read-only project state API.
 - [x] Define mutating command API with permission gates.
 - [x] Add job-plan schema for agent-proposed work.
-- [ ] Add audit log for agent actions.
+- [x] Add audit log for agent actions.
 - [ ] Add artifact provenance for agent-created files.
 - [ ] Add ACP-compatible transport spike.
 - [ ] Add local agent connection manager.
 - [ ] Add agent permission profiles.
+- [x] Add approval request model for expensive jobs.
 - [ ] Add manual approval UI for expensive jobs.
 - [ ] Add manual approval UI for dataset label edits.
 - [ ] Add manual approval UI for destructive artifact operations.
