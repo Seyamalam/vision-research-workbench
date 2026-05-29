@@ -3,16 +3,17 @@ use gpui::{
     SharedString, Styled, Window, WindowBounds, WindowOptions, div, px, rgb, size,
 };
 use vision_research_workbench::{
-    commands::{CommandSpec, PermissionGate, registry},
-    workspace::{ProjectManifest, ResearchTemplate},
+    app_state::{AppState, CommandOutcome, ExecutionMode},
+    commands::CommandPlan,
+    workspace::ResearchTemplate,
 };
 
 struct WorkbenchApp {
     sections: Vec<Section>,
     metrics: Vec<Metric>,
     tasks: Vec<Task>,
-    sample_project: ProjectManifest,
-    commands: Vec<CommandSpec>,
+    state: AppState,
+    dry_run: CommandOutcome,
 }
 
 struct Section {
@@ -33,6 +34,18 @@ struct Task {
 
 impl WorkbenchApp {
     fn new() -> Self {
+        let mut state = AppState::new();
+        let dry_run = state
+            .execute(
+                CommandPlan::CreateProject {
+                    root: "example-project".into(),
+                    name: "Untitled vision study".to_string(),
+                    template: ResearchTemplate::GenericImageClassification,
+                },
+                ExecutionMode::DryRun,
+            )
+            .expect("sample project dry-run should be valid");
+
         Self {
             sections: vec![
                 Section {
@@ -81,14 +94,14 @@ impl WorkbenchApp {
                 },
                 Metric {
                     label: "Agent Mode",
-                    value: "Planned",
-                    detail: "ACP-ready command registry and approvals",
+                    value: "Dry-run ready",
+                    detail: "Commands can preview planned writes before applying",
                 },
             ],
             tasks: vec![
                 Task {
                     title: "Create project workspace",
-                    detail: "Define local project file, SQLite state, and artifact folders.",
+                    detail: "Project manifests and artifact folders can now be created by command.",
                 },
                 Task {
                     title: "Import image dataset",
@@ -100,14 +113,11 @@ impl WorkbenchApp {
                 },
                 Task {
                     title: "Add agent command layer",
-                    detail: "Make UI actions and future ACP agents share typed commands.",
+                    detail: "Add ACP transport and approval UI on top of the shared command layer.",
                 },
             ],
-            sample_project: ProjectManifest::new(
-                "Untitled vision study",
-                ResearchTemplate::GenericImageClassification,
-            ),
-            commands: registry(),
+            state,
+            dry_run,
         }
     }
 }
@@ -282,18 +292,24 @@ impl WorkbenchApp {
                 div()
                     .text_sm()
                     .text_color(rgb(0x4b5563))
-                    .child(self.sample_project.project.name.clone()),
+                    .child("Untitled vision study"),
             )
             .child(
                 div()
                     .text_sm()
                     .text_color(rgb(0x4b5563))
-                    .child(self.sample_project.project.template.label()),
+                    .child(ResearchTemplate::GenericImageClassification.label()),
             )
             .child(
                 div().text_sm().text_color(rgb(0x4b5563)).child(
                     "Artifacts: metadata, reports, predictions, figures, manuscript, agents",
                 ),
+            )
+            .child(
+                div()
+                    .text_sm()
+                    .text_color(rgb(0x2563eb))
+                    .child(self.dry_run.summary.clone()),
             )
     }
 
@@ -338,11 +354,7 @@ impl WorkbenchApp {
     }
 
     fn agent_panel(&self) -> impl IntoElement {
-        let gated_count = self
-            .commands
-            .iter()
-            .filter(|command| command.permission != PermissionGate::None)
-            .count();
+        let gated_count = self.state.approval_required_count();
 
         let mut panel = div()
             .flex()
@@ -360,12 +372,17 @@ impl WorkbenchApp {
                     .child("Agent command layer"),
             )
             .child(div().text_sm().text_color(rgb(0x4b5563)).child(format!(
-                "{} registered commands, {} require approval",
-                self.commands.len(),
-                gated_count
+                "{} registered commands, {} require approval, {} are expensive",
+                self.state.commands.len(),
+                gated_count,
+                self.state.expensive_command_count()
+            )))
+            .child(div().text_sm().text_color(rgb(0x4b5563)).child(format!(
+                "Dry-run preview: {} planned artifact directories",
+                self.dry_run.artifacts.len()
             )));
 
-        for command in self.commands.iter().take(4) {
+        for command in self.state.commands.iter().take(4) {
             panel = panel.child(
                 div()
                     .flex()
