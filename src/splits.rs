@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::hash_map::DefaultHasher,
     error::Error,
-    fmt, fs, hash,
+    fmt, fs,
     hash::{Hash, Hasher},
     io,
     path::{Path, PathBuf},
