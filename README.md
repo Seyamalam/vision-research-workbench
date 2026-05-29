@@ -1,29 +1,43 @@
-# PCOS XAI Workbench
+# Vision Research Workbench
 
-A native macOS desktop application concept for auditing, training, evaluating, and reporting PCOS ultrasound AI experiments.
+A native macOS desktop application for image-based AI research workflows: dataset auditing, duplicate control, leakage-safe splitting, model evaluation, calibration, robustness testing, explainability, and manuscript-ready reporting.
 
-The target stack is **100% Rust for the desktop app**, using **GPUI** for a GPU-accelerated Apple Silicon-friendly interface. The app should make the research workflow reproducible from dataset intake through manuscript-ready figures, tables, and reports.
+The target stack is **100% Rust for the desktop app**, using **GPUI** for a GPU-accelerated Apple Silicon-friendly interface. The app should work for PCOS ultrasound research, leaf disease detection, pathology slides, industrial inspection, microscopy, satellite imagery, and other image-classification or image-audit projects.
 
 ## Why This App
 
-The original research workflow included dataset parsing, duplicate detection, leakage-controlled splitting, supervised and self-supervised baselines, calibration, robustness, explainability, and manuscript generation. This project turns that workflow into a local desktop workbench for repeatable experimentation.
+Image AI research often repeats the same fragile workflow: organize folders, infer labels, audit duplicates, prevent leakage, train baselines, tune thresholds, quantify uncertainty, test robustness, generate explainability panels, and assemble manuscript artifacts. This project turns that workflow into a local-first desktop workbench.
 
-## Proposed Product Scope
+The original motivating case was a PCOS ultrasound XAI paper, but the app should be dataset-agnostic. PCOS becomes one example template, not the product boundary.
 
-- Import and audit the PCOS-XAI ultrasound dataset.
+## Product Scope
+
+- Import image datasets from folder structures, CSV manifests, or project templates.
+- Map arbitrary class names into binary or multiclass labels.
 - Build image metadata and readability checks.
-- Detect exact duplicates with MD5.
-- Detect perceptual near-duplicates with pHash.
+- Detect exact duplicates with file hashes.
+- Detect perceptual near-duplicates with pHash or future embedding-based similarity.
 - Flag cross-label visual conflicts.
-- Generate duplicate and conflict panels.
-- Create leakage-controlled splits.
-- Train and evaluate baseline classifiers.
+- Generate duplicate, conflict, and sample panels.
+- Create leakage-controlled train/validation/test splits.
+- Train or import supervised and self-supervised model runs.
+- Evaluate accuracy, AUROC, AUPRC, F1, calibration, sensitivity/specificity, and confusion counts.
 - Run low-label and multi-seed comparisons.
 - Tune thresholds on validation predictions only.
 - Compute confidence intervals and bootstrap metrics.
 - Evaluate calibration and robustness.
-- Generate Grad-CAM/XAI audit panels.
-- Export manuscript-ready figures, tables, and reproducibility artifacts.
+- Generate Grad-CAM/XAI audit panels where supported.
+- Export manuscript-ready figures, tables, reports, and reproducibility artifacts.
+
+## Example Research Templates
+
+- Medical ultrasound binary classification, such as PCOS-positive versus healthy.
+- Leaf disease detection from plant images.
+- Crop stress or pest classification.
+- Histopathology or microscopy image classification.
+- Industrial defect detection.
+- Satellite or drone image classification.
+- General binary or multiclass image classification benchmarks.
 
 ## Architecture Direction
 
@@ -35,6 +49,7 @@ The original research workflow included dataset parsing, duplicate detection, le
 - Local-first project workspace model.
 - Async task runner for long jobs.
 - Persistent job history and experiment registry.
+- Extensible panels for dataset audit, experiments, metrics, XAI, manuscripts, and agents.
 
 ### Data Layer
 
@@ -42,6 +57,7 @@ The original research workflow included dataset parsing, duplicate detection, le
 - `polars` or Arrow/Parquet for tabular metadata and report exports.
 - Content-addressed file index using MD5 plus optional stronger hashes.
 - Image metadata extraction through Rust image crates.
+- Dataset template definitions for common folder and manifest layouts.
 
 ### ML/Compute Layer
 
@@ -49,7 +65,21 @@ The original research workflow included dataset parsing, duplicate detection, le
 - Prefer `candle` for Rust-native neural network inference/training prototypes.
 - Use `tch-rs` only if PyTorch compatibility is essential.
 - Use Core ML export/inference where Apple Silicon deployment performance matters.
+- Allow external command runners for heavyweight training while preserving Rust-owned provenance, logs, and artifacts.
 - Treat large training jobs as resumable background tasks with structured logs.
+
+### Agent And ACP Readiness
+
+The app should be designed so future AI coding/research agents can safely inspect projects, propose experiments, run jobs, and summarize results.
+
+- Add an internal command/action registry with typed inputs and outputs.
+- Expose project state through stable read-only APIs.
+- Keep every mutating operation auditable and reversible where practical.
+- Store job plans, tool calls, logs, artifacts, and decisions in the project database.
+- Design for Agent Client Protocol (ACP)-style integration so agents like Codex can connect to the workbench in a Zed-like workflow.
+- Support permission gates before agents run expensive jobs, delete artifacts, export manuscripts, or change dataset labels.
+- Provide machine-readable experiment manifests, result summaries, and figure manifests.
+- Keep UI actions and agent actions backed by the same command layer.
 
 ### Reporting Layer
 
@@ -57,25 +87,27 @@ The original research workflow included dataset parsing, duplicate detection, le
 - Reproducible figure manifest.
 - Manuscript table export.
 - Experiment card export for each run.
+- Project archive export for reviewers or collaborators.
 
 ## Repository Status
 
 This repository currently contains the planning and implementation roadmap. The first implementation milestone should scaffold the Rust workspace and verify a minimal GPUI window on macOS.
 
-## Recommended Repository Name
+## Repository Name
 
-`pcos-xai-workbench`
+`vision-research-workbench`
 
 ## Initial Milestones
 
 1. Scaffold Rust workspace and minimal GPUI app.
 2. Implement project workspace creation/opening.
-3. Implement dataset import and metadata indexing.
+3. Implement dataset import, label mapping, and metadata indexing.
 4. Add duplicate and near-duplicate audit views.
 5. Add leakage-aware split generation.
 6. Add prediction import and evaluation dashboard.
 7. Add calibration, robustness, and XAI report modules.
-8. Add manuscript export pipeline.
+8. Add agent-ready command registry and project-state API.
+9. Add manuscript and reproducibility export pipeline.
 
 ## Development Prerequisites
 
@@ -89,4 +121,5 @@ This repository currently contains the planning and implementation roadmap. The 
 - GPUI docs: https://docs.rs/gpui
 - GPUI site: https://www.gpui.rs/
 - GPUI source in Zed: https://github.com/zed-industries/zed/tree/main/crates/gpui
+- Agent Client Protocol: https://agentclientprotocol.com/
 

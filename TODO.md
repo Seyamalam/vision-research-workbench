@@ -1,6 +1,6 @@
 # TODO
 
-This roadmap converts the completed PCOS ultrasound research workflow into a native Rust/GPUI desktop application.
+This roadmap converts repeatable image AI research workflows into a native Rust/GPUI desktop application. PCOS ultrasound is the motivating example, but the product should support leaf disease detection, microscopy, industrial defects, satellite imagery, and other image-based research projects.
 
 ## 0. Repository And Project Setup
 
@@ -16,6 +16,10 @@ This roadmap converts the completed PCOS ultrasound research workflow into a nat
 ## 1. Product Foundation
 
 - [ ] Define workspace/project file format.
+- [ ] Define dataset-agnostic project templates.
+- [ ] Add template for binary medical imaging.
+- [ ] Add template for plant/leaf disease classification.
+- [ ] Add template for generic multiclass image classification.
 - [ ] Implement create/open/recent project flows.
 - [ ] Implement persistent settings.
 - [ ] Implement background job queue.
@@ -26,10 +30,14 @@ This roadmap converts the completed PCOS ultrasound research workflow into a nat
 
 ## 2. Data Setup
 
-- [ ] Import PCOS-XAI ultrasound dataset root.
-- [ ] Parse dataset folder structure into binary labels.
-- [ ] Map `infected` to PCOS-positive.
-- [ ] Map `noninfected` to healthy/non-PCOS.
+- [ ] Import image dataset root.
+- [ ] Import image dataset from CSV manifest.
+- [ ] Parse folder structures into labels.
+- [ ] Support binary label mapping.
+- [ ] Support multiclass label mapping.
+- [ ] Add PCOS-XAI template mapping `infected` to PCOS-positive.
+- [ ] Add PCOS-XAI template mapping `noninfected` to healthy/non-PCOS.
+- [ ] Add leaf disease template for healthy/disease or disease-class labels.
 - [ ] Build image metadata for all files.
 - [ ] Check image readability.
 - [ ] Record image width and height.
@@ -69,7 +77,7 @@ This roadmap converts the completed PCOS ultrasound research workflow into a nat
 - [ ] Create stricter pHash near-duplicate-aware splits.
 - [ ] Prevent near-duplicate groups from crossing train/validation/test.
 - [ ] Exclude cross-label pHash groups from strict evaluation.
-- [ ] Export `metadata/splits_near_duplicate_aware_phash.csv`.
+- [ ] Export `metadata/splits_near_duplicate_aware_phash.csv` or project-specific split path.
 - [ ] Display final strict split counts.
 - [ ] Add split reproducibility seed control.
 - [ ] Add split manifest export.
@@ -177,8 +185,9 @@ This roadmap converts the completed PCOS ultrasound research workflow into a nat
 - [ ] Generate Grad-CAM explanations.
 - [ ] Compare supervised ResNet-18 Grad-CAM outputs.
 - [ ] Compare SimCLR Grad-CAM outputs.
-- [ ] Generate healthy example Grad-CAM panels.
-- [ ] Generate PCOS-positive example Grad-CAM panels.
+- [ ] Generate negative/healthy example Grad-CAM panels.
+- [ ] Generate positive/disease example Grad-CAM panels.
+- [ ] Generate multiclass Grad-CAM panels.
 - [ ] Run randomized-weight Grad-CAM sanity checks.
 - [ ] Compare trained versus randomized Grad-CAM similarity.
 - [ ] Measure trained-vs-random CAM Pearson correlation.
@@ -216,7 +225,9 @@ This roadmap converts the completed PCOS ultrasound research workflow into a nat
 - [ ] Store introduction draft.
 - [ ] Store contributions.
 - [ ] Store related work notes.
-- [ ] Store PCOS ultrasound AI literature notes.
+- [ ] Store domain literature notes.
+- [ ] Store PCOS ultrasound AI literature notes as an optional template.
+- [ ] Store plant disease detection literature notes as an optional template.
 - [ ] Store SSL/medical imaging literature notes.
 - [ ] Store reporting guideline references.
 - [ ] Store dataset section.
@@ -287,7 +298,27 @@ This roadmap converts the completed PCOS ultrasound research workflow into a nat
 - [ ] Export manuscript figures in `reports/figures/`.
 - [ ] Add one-click project archive export.
 
-## 19. App UX
+## 19. Agent And ACP Readiness
+
+- [ ] Design typed command registry shared by UI and agents.
+- [ ] Define read-only project state API.
+- [ ] Define mutating command API with permission gates.
+- [ ] Add job-plan schema for agent-proposed work.
+- [ ] Add audit log for agent actions.
+- [ ] Add artifact provenance for agent-created files.
+- [ ] Add ACP-compatible transport spike.
+- [ ] Add local agent connection manager.
+- [ ] Add agent permission profiles.
+- [ ] Add manual approval UI for expensive jobs.
+- [ ] Add manual approval UI for dataset label edits.
+- [ ] Add manual approval UI for destructive artifact operations.
+- [ ] Add command dry-run support.
+- [ ] Add machine-readable experiment summaries.
+- [ ] Add machine-readable figure manifests.
+- [ ] Add machine-readable manuscript/checklist state.
+- [ ] Add Codex-oriented integration notes.
+
+## 20. App UX
 
 - [ ] Add sidebar navigation for Dataset, Audit, Splits, Models, Metrics, Calibration, Robustness, XAI, Manuscript, and Exports.
 - [ ] Add dense table views for metadata and results.
@@ -300,8 +331,11 @@ This roadmap converts the completed PCOS ultrasound research workflow into a nat
 - [ ] Add keyboard shortcuts.
 - [ ] Add drag-and-drop dataset import.
 - [ ] Add dark and light theme support.
+- [ ] Add agent activity panel.
+- [ ] Add command palette.
+- [ ] Add project search.
 
-## 20. Technical Risks To Resolve Early
+## 21. Technical Risks To Resolve Early
 
 - [ ] Verify GPUI packaging story for distributable `.app`.
 - [ ] Verify image table virtualization performance with 10k+ rows.
@@ -311,4 +345,5 @@ This roadmap converts the completed PCOS ultrasound research workflow into a nat
 - [ ] Validate Grad-CAM feasibility in the selected Rust ML stack.
 - [ ] Validate reproducibility guarantees across Apple Silicon machines.
 - [ ] Validate memory usage on large robustness and bootstrap jobs.
-
+- [ ] Validate ACP integration maturity and expected protocol surface.
+- [ ] Validate sandboxing and permission model for local agents.
