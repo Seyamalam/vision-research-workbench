@@ -55,7 +55,9 @@ pub enum CommandPlan {
     ImportDataset {
         path: PathBuf,
     },
-    AuditDuplicates,
+    AuditDuplicates {
+        path: PathBuf,
+    },
     GenerateSplits {
         seed: u64,
     },

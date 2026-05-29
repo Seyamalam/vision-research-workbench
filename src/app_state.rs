@@ -1,6 +1,7 @@
 use crate::{
     commands::{CommandPlan, CommandRisk, CommandSpec, PermissionGate, registry},
     dataset::{DatasetError, import_image_folder},
+    duplicates::{DuplicateError, audit_exact_duplicates},
     settings::{AppSettings, SettingsError},
     workspace::{ProjectManifest, WorkspaceError},
 };
@@ -121,10 +122,36 @@ impl AppState {
                     artifacts: vec![summary.output_csv],
                 })
             }
-            CommandPlan::AuditDuplicates => Ok(not_implemented_outcome(
-                "Audit duplicates",
-                "Duplicate auditing is planned.".to_string(),
-            )),
+            CommandPlan::AuditDuplicates { path } => {
+                let (Some(project_root), Some(project)) =
+                    (self.project_root.as_ref(), self.active_project.as_ref())
+                else {
+                    return Err(AppStateError::NoActiveProject);
+                };
+
+                if mode == ExecutionMode::DryRun {
+                    return Ok(CommandOutcome {
+                        applied: false,
+                        summary: format!("Would audit exact duplicates in {}", path.display()),
+                        artifacts: vec![
+                            project_root
+                                .join(&project.artifacts.metadata_dir)
+                                .join(crate::duplicates::EXACT_DUPLICATES_CSV_NAME),
+                        ],
+                    });
+                }
+
+                let summary = audit_exact_duplicates(path, project_root, project)?;
+
+                Ok(CommandOutcome {
+                    applied: true,
+                    summary: format!(
+                        "Found {} exact duplicate groups and {} duplicate files beyond first copies",
+                        summary.duplicate_groups, summary.duplicate_files_beyond_first
+                    ),
+                    artifacts: vec![summary.output_csv],
+                })
+            }
             CommandPlan::GenerateSplits { seed } => Ok(not_implemented_outcome(
                 "Generate splits",
                 format!("Split generation is planned with seed {seed}."),
@@ -179,6 +206,7 @@ pub enum AppStateError {
     Workspace(WorkspaceError),
     Settings(SettingsError),
     Dataset(DatasetError),
+    Duplicate(DuplicateError),
 }
 
 impl From<WorkspaceError> for AppStateError {
@@ -199,6 +227,12 @@ impl From<DatasetError> for AppStateError {
     }
 }
 
+impl From<DuplicateError> for AppStateError {
+    fn from(error: DuplicateError) -> Self {
+        Self::Duplicate(error)
+    }
+}
+
 impl fmt::Display for AppStateError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -206,6 +240,7 @@ impl fmt::Display for AppStateError {
             Self::Workspace(error) => write!(formatter, "{error}"),
             Self::Settings(error) => write!(formatter, "{error}"),
             Self::Dataset(error) => write!(formatter, "{error}"),
+            Self::Duplicate(error) => write!(formatter, "{error}"),
         }
     }
 }
