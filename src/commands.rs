@@ -15,6 +15,7 @@ pub struct CommandSpec {
 #[serde(rename_all = "kebab-case")]
 pub enum CommandId {
     CreateProject,
+    OpenProject,
     ImportDataset,
     AuditDuplicates,
     GenerateSplits,
@@ -48,6 +49,9 @@ pub enum CommandPlan {
         name: String,
         template: ResearchTemplate,
     },
+    OpenProject {
+        root: PathBuf,
+    },
     ImportDataset {
         path: String,
     },
@@ -69,6 +73,13 @@ pub fn registry() -> Vec<CommandSpec> {
             label: "Create project",
             description: "Create a project manifest and default artifact folders.",
             risk: CommandRisk::WritesProject,
+            permission: PermissionGate::None,
+        },
+        CommandSpec {
+            id: CommandId::OpenProject,
+            label: "Open project",
+            description: "Load an existing project manifest and make it active.",
+            risk: CommandRisk::ReadOnly,
             permission: PermissionGate::None,
         },
         CommandSpec {

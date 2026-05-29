@@ -1,5 +1,6 @@
 use crate::{
     commands::{CommandPlan, CommandRisk, CommandSpec, PermissionGate, registry},
+    settings::{AppSettings, SettingsError},
     workspace::{ProjectManifest, WorkspaceError},
 };
 use serde::{Deserialize, Serialize};
@@ -10,6 +11,7 @@ pub struct AppState {
     pub project_root: Option<PathBuf>,
     pub active_project: Option<ProjectManifest>,
     pub commands: Vec<CommandSpec>,
+    pub settings: AppSettings,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -32,6 +34,7 @@ impl AppState {
             project_root: None,
             active_project: None,
             commands: registry(),
+            settings: AppSettings::default(),
         }
     }
 
@@ -64,6 +67,27 @@ impl AppState {
                     applied: true,
                     summary: format!("Created project manifest at {}", manifest_path.display()),
                     artifacts: vec![manifest_path],
+                })
+            }
+            CommandPlan::OpenProject { root } => {
+                let manifest = ProjectManifest::load(&root)?;
+                self.settings.remember_project(root.clone());
+
+                if mode == ExecutionMode::DryRun {
+                    return Ok(CommandOutcome {
+                        applied: false,
+                        summary: format!("Would open project at {}", root.display()),
+                        artifacts: vec![root.join(crate::workspace::PROJECT_FILE_NAME)],
+                    });
+                }
+
+                self.project_root = Some(root.clone());
+                self.active_project = Some(manifest);
+
+                Ok(CommandOutcome {
+                    applied: true,
+                    summary: format!("Opened project at {}", root.display()),
+                    artifacts: vec![root.join(crate::workspace::PROJECT_FILE_NAME)],
                 })
             }
             CommandPlan::ImportDataset { path } => Ok(not_implemented_outcome(
@@ -125,6 +149,7 @@ fn not_implemented_outcome(label: &str, summary: String) -> CommandOutcome {
 #[derive(Debug)]
 pub enum AppStateError {
     Workspace(WorkspaceError),
+    Settings(SettingsError),
 }
 
 impl From<WorkspaceError> for AppStateError {
@@ -133,10 +158,17 @@ impl From<WorkspaceError> for AppStateError {
     }
 }
 
+impl From<SettingsError> for AppStateError {
+    fn from(error: SettingsError) -> Self {
+        Self::Settings(error)
+    }
+}
+
 impl fmt::Display for AppStateError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Workspace(error) => write!(formatter, "{error}"),
+            Self::Settings(error) => write!(formatter, "{error}"),
         }
     }
 }
@@ -206,5 +238,33 @@ mod tests {
             Some("Leaf study")
         );
         assert!(root.join(PROJECT_FILE_NAME).is_file());
+    }
+
+    #[test]
+    fn open_project_loads_manifest_and_tracks_recent_project() {
+        let temp = tempfile::tempdir().expect("tempdir");
+        let root = temp.path().join("existing-study");
+        ProjectManifest::new("Existing", ResearchTemplate::BinaryMedicalImaging)
+            .save(&root)
+            .expect("save fixture project");
+        let mut state = AppState::new();
+
+        let outcome = state
+            .execute(
+                CommandPlan::OpenProject { root: root.clone() },
+                ExecutionMode::Apply,
+            )
+            .expect("open project");
+
+        assert!(outcome.applied);
+        assert_eq!(state.project_root.as_deref(), Some(root.as_path()));
+        assert_eq!(state.settings.last_project.as_deref(), Some(root.as_path()));
+        assert_eq!(
+            state
+                .active_project
+                .as_ref()
+                .map(|project| project.project.template),
+            Some(ResearchTemplate::BinaryMedicalImaging)
+        );
     }
 }
