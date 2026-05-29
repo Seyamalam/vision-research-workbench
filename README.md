@@ -91,7 +91,19 @@ The app should be designed so future AI coding/research agents can safely inspec
 
 ## Repository Status
 
-This repository currently contains the planning and implementation roadmap. The first implementation milestone should scaffold the Rust workspace and verify a minimal GPUI window on macOS.
+This repository now contains the first GPUI shell: a native Rust macOS window with a minimal sidebar and dashboard layout. The next implementation step is to introduce a project workspace file, SQLite-backed state, and typed commands that both the UI and future agents can call.
+
+## Run Locally
+
+```bash
+cargo run
+```
+
+If GPUI fails while compiling Metal shaders, install Apple's Metal toolchain:
+
+```bash
+xcodebuild -downloadComponent MetalToolchain
+```
 
 ## Repository Name
 
@@ -99,7 +111,7 @@ This repository currently contains the planning and implementation roadmap. The 
 
 ## Initial Milestones
 
-1. Scaffold Rust workspace and minimal GPUI app.
+1. Scaffold Rust workspace and minimal GPUI app. Done.
 2. Implement project workspace creation/opening.
 3. Implement dataset import, label mapping, and metadata indexing.
 4. Add duplicate and near-duplicate audit views.
@@ -122,4 +134,3 @@ This repository currently contains the planning and implementation roadmap. The 
 - GPUI site: https://www.gpui.rs/
 - GPUI source in Zed: https://github.com/zed-industries/zed/tree/main/crates/gpui
 - Agent Client Protocol: https://agentclientprotocol.com/
-

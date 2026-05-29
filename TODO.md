@@ -4,8 +4,8 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 
 ## 0. Repository And Project Setup
 
-- [ ] Initialize Rust workspace.
-- [ ] Add minimal GPUI macOS window.
+- [x] Initialize Rust workspace.
+- [x] Add minimal GPUI macOS window.
 - [ ] Add app icon and bundle metadata.
 - [ ] Add `justfile` or `cargo-make` task runner.
 - [ ] Add formatting, linting, and test commands.
@@ -338,6 +338,7 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 ## 21. Technical Risks To Resolve Early
 
 - [ ] Verify GPUI packaging story for distributable `.app`.
+- [x] Verify GPUI requires Apple's Metal Toolchain for shader compilation.
 - [ ] Verify image table virtualization performance with 10k+ rows.
 - [ ] Verify image grid performance with thousands of thumbnails.
 - [ ] Decide Rust-native training versus external training bridge.

@@ -1,0 +1,11 @@
+[package]
+name = "vision-research-workbench"
+version = "0.1.0"
+edition = "2024"
+description = "Native Rust GPUI workbench for image AI research workflows"
+license = "MIT"
+repository = "https://github.com/Seyamalam/vision-research-workbench"
+
+[dependencies]
+gpui = "0.2.2"
+
