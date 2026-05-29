@@ -1,0 +1,13 @@
+/target/
+/.DS_Store
+/.idea/
+/.vscode/
+*.log
+*.tmp
+
+# Research data and generated artifacts should be imported/exported explicitly.
+/data/
+/metadata/
+/reports/
+/manuscript/paper/main.pdf
+
