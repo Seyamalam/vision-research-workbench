@@ -15,11 +15,15 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 
 ## 1. Product Foundation
 
-- [ ] Define workspace/project file format.
+- [x] Define workspace/project file format.
 - [ ] Define dataset-agnostic project templates.
 - [ ] Add template for binary medical imaging.
 - [ ] Add template for plant/leaf disease classification.
-- [ ] Add template for generic multiclass image classification.
+- [x] Add template for generic multiclass image classification.
+- [x] Add project manifest save/load support.
+- [x] Add default artifact directory layout.
+- [x] Add project creation command core.
+- [ ] Add project open command core.
 - [ ] Implement create/open/recent project flows.
 - [ ] Implement persistent settings.
 - [ ] Implement background job queue.
@@ -300,10 +304,10 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 
 ## 19. Agent And ACP Readiness
 
-- [ ] Design typed command registry shared by UI and agents.
+- [x] Design typed command registry shared by UI and agents.
 - [ ] Define read-only project state API.
-- [ ] Define mutating command API with permission gates.
-- [ ] Add job-plan schema for agent-proposed work.
+- [x] Define mutating command API with permission gates.
+- [x] Add job-plan schema for agent-proposed work.
 - [ ] Add audit log for agent actions.
 - [ ] Add artifact provenance for agent-created files.
 - [ ] Add ACP-compatible transport spike.
@@ -312,7 +316,7 @@ This roadmap converts repeatable image AI research workflows into a native Rust/
 - [ ] Add manual approval UI for expensive jobs.
 - [ ] Add manual approval UI for dataset label edits.
 - [ ] Add manual approval UI for destructive artifact operations.
-- [ ] Add command dry-run support.
+- [x] Add command dry-run support.
 - [ ] Add machine-readable experiment summaries.
 - [ ] Add machine-readable figure manifests.
 - [ ] Add machine-readable manuscript/checklist state.

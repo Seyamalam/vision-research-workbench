@@ -91,7 +91,15 @@ The app should be designed so future AI coding/research agents can safely inspec
 
 ## Repository Status
 
-This repository now contains the first GPUI shell: a native Rust macOS window with a minimal sidebar and dashboard layout. The next implementation step is to introduce a project workspace file, SQLite-backed state, and typed commands that both the UI and future agents can call.
+This repository now contains the first GPUI shell plus a reusable application core:
+
+- A native Rust macOS window with a minimal sidebar and dashboard layout.
+- A TOML project manifest named `vision-workbench.toml`.
+- Default artifact folders for metadata, reports, predictions, figures, manuscripts, and agents.
+- A typed command registry with risk levels and approval gates.
+- A dry-run/apply execution path for project creation commands.
+
+The next implementation step is to add project open/recent-project flows and persistent SQLite-backed state.
 
 ## Run Locally
 
@@ -112,13 +120,13 @@ xcodebuild -downloadComponent MetalToolchain
 ## Initial Milestones
 
 1. Scaffold Rust workspace and minimal GPUI app. Done.
-2. Implement project workspace creation/opening.
+2. Implement project workspace creation/opening. Creation core started.
 3. Implement dataset import, label mapping, and metadata indexing.
 4. Add duplicate and near-duplicate audit views.
 5. Add leakage-aware split generation.
 6. Add prediction import and evaluation dashboard.
 7. Add calibration, robustness, and XAI report modules.
-8. Add agent-ready command registry and project-state API.
+8. Add agent-ready command registry and project-state API. Command registry and dry-run started.
 9. Add manuscript and reproducibility export pipeline.
 
 ## Development Prerequisites
