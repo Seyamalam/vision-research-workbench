@@ -5835,6 +5835,7 @@ dependencies = [
  "csv",
  "gpui",
  "image",
+ "md-5",
  "rusqlite",
  "serde",
  "serde_json",

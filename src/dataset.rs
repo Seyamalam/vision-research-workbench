@@ -139,7 +139,7 @@ fn read_image_record(dataset_root: &Path, path: &Path) -> Result<ImageRecord, Da
     })
 }
 
-fn is_supported_image_path(path: &Path) -> bool {
+pub fn is_supported_image_path(path: &Path) -> bool {
     matches!(
         path.extension()
             .and_then(OsStr::to_str)
